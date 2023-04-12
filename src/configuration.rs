@@ -4,49 +4,40 @@ use std::error::Error;
 
 #[derive(Parser, Debug)] // requires `derive` feature
 pub struct Configuration {
-    #[arg(short = 'd', long = "end_date")]
+    #[arg(short = 'd', long = "end_date", value_parser = parse_target_date)]
     pub(crate) end_date: NaiveDate,
     #[arg(short = 'e', long = "exclusions", value_parser = parse_exclusions)]
     pub(crate) excluded: Option<Vec<(NaiveDate, NaiveDate)>>,
 }
 
 fn parse_exclusions(
-    s: &str,
+    exclusions: &str,
 ) -> Result<(NaiveDate, NaiveDate), Box<dyn Error + Send + Sync + 'static>> {
-    let pos = s
-        .find('/')
-        .ok_or_else(|| format!("invalid KEY=value: no `=` found in `{s}`"))?;
-    Ok((s[..pos].parse()?, s[pos + 1..].parse()?))
+    let pos = exclusions.find('/').ok_or_else(|| {
+        format!("Invalid exclusion date format: Must be yyyy-mm-dd/yyyy-mm-dd in `{exclusions}`")
+    })?;
+
+    let begin = exclusions[..pos].parse()?;
+    let end = exclusions[pos + 1..].parse()?;
+
+    if end < begin {
+        Err(format!(
+            "Invalid exclusion provided. End({begin}) needs to be after Start({end})"
+        ))?;
+    }
+
+    Ok((begin, end))
 }
 
-impl Configuration {
-    pub fn validate(&self) -> Result<(), String> {
-        let today = Local::now().date_naive();
-        let end_date = &self.end_date;
+fn parse_target_date(
+    exclusions: &str,
+) -> Result<NaiveDate, Box<dyn Error + Send + Sync + 'static>> {
+    let end_date = exclusions.parse::<NaiveDate>()?;
+    let today = Local::now().date_naive();
 
-        let mut messages = vec![];
-
-        if today > *end_date {
-            messages.push(format!(
-                "Invalid end date provided: {end_date}. It must be in the future"
-            ));
-        }
-
-        if let Some(exclusions) = &self.excluded {
-            for exclusion in exclusions {
-                let start = exclusion.0;
-                let end = exclusion.1;
-                if end < start {
-                    messages.push(format!(
-                        "Invalid Exclusion provided. End ({end}) needs to be after Start({start})"
-                    ))
-                }
-            }
-        }
-        if messages.len() > 0 {
-            return Err(messages.join("\n"));
-        }
-
-        Ok(())
+    if today > end_date {
+        Err("Invalid end date provided: {end_date}. It must be in the future")?;
     }
+
+    Ok(end_date)
 }
