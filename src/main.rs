@@ -1,19 +1,21 @@
 mod calculator;
 mod configuration;
+mod output_writer;
 
 use clap::Parser;
 use configuration::Configuration;
+use output_writer::OutputWriter;
 
 use crate::calculator::Calculator;
 
 fn main() {
-    let arguments = Configuration::parse();
+    let writer = OutputWriter::default();
 
-    println!("{arguments:?}");
+    let arguments = Configuration::parse();
 
     let calculator = Calculator::new(arguments);
 
     let days_remaining = calculator.calculate_remaining_days();
 
-    println!("remaining days: {days_remaining}");
+    writer.write_output(days_remaining);
 }
