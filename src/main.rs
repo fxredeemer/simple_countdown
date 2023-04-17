@@ -15,7 +15,7 @@ fn main() {
 
     let calculator = Calculator::new(arguments);
 
-    let days_remaining = calculator.calculate_remaining_days();
+    let remaining_duration = calculator.calculate_remaining_duration();
 
-    writer.write_output(days_remaining);
+    writer.write_output(remaining_duration);
 }
