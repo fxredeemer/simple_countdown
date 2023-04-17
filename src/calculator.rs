@@ -19,7 +19,7 @@ impl Calculator {
         let work_days = self.calculate_remaining_full_days();
 
         let addition = match self.now.time().hour() {
-            0..=12 => 30,
+            0..=11 => 30,
             _ => 0,
         };
 
