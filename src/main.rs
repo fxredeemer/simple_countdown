@@ -17,5 +17,5 @@ fn main() {
 
     let remaining_duration = calculator.calculate_remaining_duration();
 
-    writer.write_output(remaining_duration);
+    writer.write_output(&remaining_duration);
 }
