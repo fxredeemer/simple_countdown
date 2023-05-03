@@ -5,9 +5,11 @@ use std::error::Error;
 #[derive(Parser, Debug)] // requires `derive` feature
 pub struct Configuration {
     #[arg(short = 'd', long = "end_date", value_parser = parse_target_date)]
-    pub(crate) end_date: NaiveDate,
+    pub end_date: NaiveDate,
     #[arg(short = 'e', long = "exclusions", value_parser = parse_exclusions)]
-    pub(crate) excluded: Option<Vec<(NaiveDate, NaiveDate)>>,
+    pub excluded: Option<Vec<(NaiveDate, NaiveDate)>>,
+    #[arg(short = 'o', long = "days_in_office")]
+    pub in_office_days: Option<Vec<chrono::Weekday>>,
 }
 
 fn parse_exclusions(
