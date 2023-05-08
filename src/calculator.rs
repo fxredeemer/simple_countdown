@@ -53,7 +53,7 @@ impl Calculator {
 
         let day_count = total_days.num_days() as i32;
 
-        let mut work_days = 0;
+        let mut full_days = 0;
 
         for i in 0..day_count {
             let day = today + Duration::days(i as i64);
@@ -68,9 +68,8 @@ impl Calculator {
 
             self.count_in_office_days(day, &mut in_office_day_count);
 
-            work_days += 1;
+            full_days += 1;
         }
-        let full_days = work_days - 1;
 
         RemainingDays {
             full_days,
@@ -96,7 +95,7 @@ impl Calculator {
 
     fn is_excluded(&self, day: chrono::NaiveDate) -> bool {
         if let Some(exclusions) = &self.configuration.excluded {
-            return exclusions.iter().any(|d| day > d.0 && day < d.1);
+            return exclusions.iter().any(|d| day >= d.0 && day <= d.1);
         }
 
         false
